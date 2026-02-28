@@ -1,0 +1,26 @@
+node_modules/
+.env
+.env.local
+.env.*.local
+*.log
+
+# Never commit credentials (use .env + env vars only; no credentials.json)
+credentials.json
+**/credentials*.json
+**/credentials*.json.example
+dist/
+
+# Playwright
+test-results/
+playwright-report/
+playwright/.cache/
+blob-report/
+
+# ESLint
+.eslintcache
+
+# IDE
+.idea/
+.vscode/
+*.swp
+.DS_Store

@@ -1,0 +1,31 @@
+{
+  "name": "playwright-test",
+  "version": "1.0.0",
+  "description": "PayPlan UAT E2E tests - Phase 2 (admin login, Patria flow)",
+  "private": true,
+  "scripts": {
+    "test": "playwright test --project=chromium",
+    "test:phase2": "playwright test --project=chromium",
+    "test:ci": "playwright test --project=chromium",
+    "test:smoke": "playwright test e2e/specs/smoke --project=chromium",
+    "test:admin": "playwright test e2e/specs/smoke/platform-admin --project=chromium",
+    "test:patria": "playwright test e2e/specs/smoke/patria --project=chromium",
+    "report": "playwright show-report",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0",
+    "dotenv": "^16.4.5",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-playwright": "^2.0.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.6.3"
+  }
+}

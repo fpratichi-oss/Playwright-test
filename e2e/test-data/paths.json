@@ -1,0 +1,20 @@
+{
+  "admin": {
+    "login": "/platform/admin/login",
+    "manageTenants": "/platform/admin/manage-tenants"
+  },
+  "tenants": {
+    "rl90": { "admin": "/lto/admin", "application": "/lto/lto/rl90/application/loan" },
+    "soonLoan": { "admin": "/soon-loan/admin/", "application": "/soon-loan/soon-loan/application/registration" },
+    "kornerstone": { "application": "/lto/lto/application/loan" },
+    "mySmile": { "application": "/my-smile/my-smile/application/registration" },
+    "edvisio": { "application": "/ice/ice/application/loan" },
+    "qwikCash": { "application": "/qwik-cash/qwik-cash/application/loan" },
+    "rupertsVault": { "application": "/rupertsvault/rupertsvault/application/loan" },
+    "extracredit": { "application": "/extracredit/extracredit/application/registration" },
+    "flyCountry": { "application": "/fly-country-financial/fly-country-financial/application/registration" },
+    "patria": { "apiPath": "/api/leads-management/patria/process" },
+    "anticipo": { "application": "/anticipo/anticipo/application" },
+    "townFinancial": { "admin": "/townfinancial/admin", "application": "/townfinancial/admin/applications" }
+  }
+}
