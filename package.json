@@ -1,7 +1,7 @@
 {
   "name": "playwright-test",
   "version": "1.0.0",
-  "description": "PayPlan UAT E2E tests - Phase 2 (admin login, Patria flow)",
+  "description": "PayPlan UAT E2E (admin login, Patria flow)",
   "private": true,
   "scripts": {
     "test": "playwright test --project=chromium",

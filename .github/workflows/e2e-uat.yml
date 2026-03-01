@@ -48,7 +48,7 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
-      - name: Run E2E (Phase 2)
+      - name: Run E2E (UAT)
         run: npm run test:ci
         env:
           BASE_URL: ${{ secrets.BASE_URL }}
