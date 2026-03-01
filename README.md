@@ -5,11 +5,14 @@ E2E test suite for PayPlan **UAT only**: admin login/tenant list (UI) and Patria
 ## Project structure
 
 ```
-├── config/                    # Env loading + UAT config (env.ts, env/, global-setup.ts)
+├── config/                    # Env loading + UAT config
+│   ├── env.ts                 # Re-exports from env/
+│   ├── global-setup.ts
+│   └── env/                   # load.ts, index.ts, uat.ts
 ├── e2e/
-│   ├── fixtures/              # Auth fixture (logged-in admin page)
+│   ├── fixtures/
 │   │   └── auth.fixture.ts
-│   ├── pages/                 # Page Object Model
+│   ├── pages/
 │   │   └── platform-admin/
 │   │       ├── AdminLogin.page.ts
 │   │       └── TenantList.page.ts
@@ -27,6 +30,7 @@ E2E test suite for PayPlan **UAT only**: admin login/tenant list (UI) and Patria
 ├── .github/workflows/
 │   └── e2e-uat.yml            # Runs on PR to main/master in this repo
 ├── playwright.config.ts
+├── tsconfig.json
 └── package.json
 ```
 
@@ -35,7 +39,7 @@ E2E test suite for PayPlan **UAT only**: admin login/tenant list (UI) and Patria
 | Spec | What it does |
 |------|----------------|
 | `smoke/platform-admin/admin-panel-login-and-tenant-list.spec.ts` | Admin login → Manage Tenants list; invalid credentials; unauthenticated redirect (3 tests) |
-| `smoke/patria/patria-contract.spec.ts` | POST lead to Patria API → assert 201 and response contract (leadId, link, tier, bidData, platformKey). In CI both flows run; locally skipped if `UI_AUTOMATION_KEY` not set (6 tests) |
+| `smoke/patria/patria-contract.spec.ts` | POST lead to Patria API → assert 201 and response contract (leadId, link, tier, bidData, platformKey) (6 tests) |
 
 **Total:** 2 spec files, 9 tests. Chromium only; config from env.
 
@@ -43,11 +47,13 @@ E2E test suite for PayPlan **UAT only**: admin login/tenant list (UI) and Patria
 
 | Command | What it runs |
 |---------|----------------|
-| `npm run test` or `npm run test:ci` | Full suite (admin + Patria). In CI both run; locally Patria runs only if `UI_AUTOMATION_KEY` set. |
-| `npm run test:smoke` | Same, scoped to `e2e/specs/smoke` |
+| `npm run test` or `npm run test:ci` | Full suite (admin + Patria) |
+| `npm run test:smoke` | Full suite, scoped to `e2e/specs/smoke` |
 | `npm run test:admin` | Admin specs only (platform-admin) |
-| `npm run test:patria` | Patria contract spec only (skipped locally without `UI_AUTOMATION_KEY`) |
+| `npm run test:patria` | Patria contract spec only |
 | `npm run report` | Open last HTML report |
+
+Patria tests run only when `UI_AUTOMATION_KEY` is set (see [Env vars](#env-vars-reference)).
 
 ## Local setup
 
@@ -66,13 +72,13 @@ E2E test suite for PayPlan **UAT only**: admin login/tenant list (UI) and Patria
 3. **Run**
    ```bash
    npm run test:admin    # admin only
-   npm run test:ci      # full suite (Patria skipped if no key)
+   npm run test:ci      # full suite
    ```
 
 ## Test data and credentials
 
 - **Secrets** (never commit): in `.env` locally; GitHub Secrets in CI. Used via `config/env` (`env.ADMIN_EMAIL`, `env.ADMIN_PASSWORD`, `env.UI_AUTOMATION_KEY`, etc.).
-- **Non-secret data**: `e2e/test-data/` — `application.json`, `paths.json`, and `patria-lead-payload.ts`. Import `applicationTestData`, `paths`, or `buildValidLeadPayload` from `e2e/test-data` (adjust path from spec).
+- **Non-secret data**: `e2e/test-data/` — `application.json`, `paths.json`, and `patria-lead-payload.ts`. Import `applicationTestData`, `paths`, or `buildValidLeadPayload` from `e2e/test-data` (adjust path based on spec location).
 
 ## Requirements
 
@@ -104,7 +110,7 @@ E2E test suite for PayPlan **UAT only**: admin login/tenant list (UI) and Patria
    - `BASE_URL` — UAT app URL (e.g. `https://uat.payplan.ai`)
    - `ADMIN_EMAIL` — UAT platform admin email
    - `ADMIN_PASSWORD` — UAT platform admin password
-   - `UI_AUTOMATION_KEY` — API key the Patria lead API expects in the `apiKey` header. CI fails at startup if this is missing so both flows always run.
+   - `UI_AUTOMATION_KEY` — API key that the Patria lead API expects in the `apiKey` header. CI fails at startup if this is missing so both flows always run.
 
    **Optional:** `API_BASE_URL` — defaults to `https://uat-api.payplan.ai` if not set.
 
@@ -114,7 +120,7 @@ E2E test suite for PayPlan **UAT only**: admin login/tenant list (UI) and Patria
 
 **Result:** Every PayPlan PR runs both admin and Patria tests. On failure, download the **playwright-report** and **test-results** artifacts from the workflow run to debug. If you need a sample workflow YAML or have questions, reach out to QA.
 
-**Why `UI_AUTOMATION_KEY`?** The Patria lead API requires this key in the request header. In **CI it is required** — if missing, the run fails at startup so both flows are always executed. Locally, Patria tests are skipped when the key is not set so you can run admin-only.
+**Why `UI_AUTOMATION_KEY`?** Patria API expects this key in the request header; see [Env vars](#env-vars-reference) for when it’s required vs optional.
 
 ## Env vars (reference)
 
