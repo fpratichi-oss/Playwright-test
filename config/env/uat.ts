@@ -1,9 +1,10 @@
 /**
- * UAT environment config.
- * URLs, paths, and credentials for PayPlan UAT only.
+ * Environment config (UAT defaults).
+ * URLs, paths, and credentials for PayPlan-style environments.
+ * UAT values are used as defaults when specific env vars are not provided.
  */
 
-/** Typed UAT env for consumers (single source of truth). */
+/** Typed env for consumers (single source of truth). */
 export interface UatEnv {
   BASE_URL: string;
   API_BASE_URL: string;
@@ -16,7 +17,7 @@ export interface UatEnv {
 
 const isCI = process.env.CI === 'true' || process.env.CI === '1';
 
-/** Fail fast if required UAT env vars are missing. Call before admin specs. */
+/** Fail fast if required env vars are missing in CI. Call before admin specs. */
 export function requireEnvForE2E(): void {
   const missing: string[] = [];
   if (!process.env.BASE_URL?.trim() && isCI) missing.push('BASE_URL');

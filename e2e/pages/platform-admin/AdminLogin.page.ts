@@ -1,6 +1,6 @@
 /**
  * Page object for the PayPlan platform admin login screen.
- * UAT: https://uat.payplan.ai/platform/admin/login
+ * Example UAT URL: https://uat.payplan.ai/platform/admin/login
  */
 import { Page } from '@playwright/test';
 import { expect } from '@playwright/test';

@@ -41,7 +41,7 @@ export interface PatriaLeadPayloadOverrides {
 /** Defaults for contract test: known-good accepted lead (SSN 100000001). */
 const DEFAULT_OVERRIDES: Omit<Required<PatriaLeadPayloadOverrides>, 'email'> = {
   ssnNumber: '100000001',
-  loanAmount: '1000',
+  loanAmount: '1200',
   monthlyIncome: '5500',
 };
 

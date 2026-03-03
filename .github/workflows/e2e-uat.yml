@@ -2,7 +2,7 @@
 # E2E UAT – Playwright tests against the UAT environment
 # ------------------------------------------------------------------------------
 #
-# What: Runs the full E2E suite (admin login, tenant list, Patria, etc.) in CI.
+# What: Runs the full E2E suite (admin login, tenant list, Patria, etc.) in CI against UAT.
 #
 # When: Triggers only on pull requests targeting main or master (open, or new
 #       pushes to an existing PR). It does NOT run on direct pushes to main/master.
