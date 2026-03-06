@@ -1,5 +1,10 @@
 /**
- * Patria leads API — payload builder for contract tests (PR automation).
+ * Patria leads API — payload builder.
+ *
+ * Used by:
+ *   - patria-contract.spec.ts (happy path: valid lead → 201)
+ *   - patria-negative.spec.ts (auth + bad payload rejection)
+ *
  * Shape matches the API contract used in Postman / UAT.
  * Overrides: email (unique per run), ssnNumber, loanAmount, monthlyIncome.
  * Dates are generated dynamically (next Friday, +14 days) to avoid stale values.
@@ -45,15 +50,6 @@ const DEFAULT_OVERRIDES: Omit<Required<PatriaLeadPayloadOverrides>, 'email'> = {
   monthlyIncome: '5500',
 };
 
-/** Address object required by API (not a string). */
-export interface PatriaAddress {
-  zipCode: string;
-  city: string;
-  state: string;
-  street: string;
-  monthsAtAddress: string;
-}
-
 export interface PatriaLeadPayload {
   campaignKey: string;
   clientIP: string;
@@ -63,7 +59,13 @@ export interface PatriaLeadPayload {
     firstName: string;
     lastName: string;
     birthday: string;
-    address: PatriaAddress;
+    address: {
+      zipCode: string;
+      city: string;
+      state: string;
+      street: string;
+      monthsAtAddress: string;
+    };
     email: string;
     homeOwnership: string;
     driversLicense: string;
@@ -109,8 +111,8 @@ export function buildValidLeadPayload(overrides: PatriaLeadPayloadOverrides = {}
     loanAmount: o.loanAmount,
     refererURL: 'https://testloans.com',
     personalInformation: {
-      firstName: 'Sam',
-      lastName: 'Ave',
+      firstName: 'Test-Sam',
+      lastName: 'Test-Ave',
       birthday: '1989/03/12',
       address: {
         zipCode: '55316',

@@ -1,7 +1,21 @@
 /**
- * Smoke: Patria leads API — contract tests.
- * Covers: 201 on valid lead, response shape (leadId, link, tier, status, bidData, platformKey), UUID/link format, tier and status enums, bidData bounds.
- * Requires UI_AUTOMATION_KEY in .env (or GitHub Secrets in CI). Run: npm run test:patria or npm run test:smoke
+ * Smoke: Patria leads API — contract tests (happy path).
+ *
+ * What this file covers:
+ *   - POST one valid lead → expects 201 Created.
+ *   - Response shape: leadId, link, tier, status, reason, bidData, platformKey.
+ *   - leadId is UUID; link contains /application?appToken=.
+ *   - tier in [A, B, C, D, '']; status in [accepted, rejected].
+ *   - bidData: assignedLoanAmount <= requested, apr > 0, payFrequency = biweekly.
+ *   - platformKey === 'patria'.
+ *
+ * One API call per run (beforeAll). Creates one real lead/application.
+ * Tests run serially — they share the single response from beforeAll.
+ *
+ * Negative tests: see patria-negative.spec.ts (auth, routing, bad payload).
+ *
+ * Requires: UI_AUTOMATION_KEY in .env (local) or GitHub Secrets (CI).
+ * Run: npm run test:patria or npm run test:smoke
  */
 import { test, expect } from '@playwright/test';
 import { env } from '../../../../config/env';

@@ -4,8 +4,8 @@
 #
 # What: Runs the full E2E suite (admin login, tenant list, Patria, etc.) in CI against UAT.
 #
-# When: Triggers only on pull requests targeting main or master (open, or new
-#       pushes to an existing PR). It does NOT run on direct pushes to main/master.
+# When: Manual only (workflow_dispatch). Use "Run workflow" button in GitHub Actions tab.
+#       Does NOT auto-trigger on PRs or pushes. PayPlan's deploy workflow handles automatic runs.
 #
 # Concurrency: If you push again to the same PR branch, the previous run is
 #              cancelled and only the latest run executes (saves time and cost).
@@ -23,8 +23,7 @@
 name: E2E UAT
 
 on:
-  pull_request:
-    branches: [main, master]
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.ref }}
