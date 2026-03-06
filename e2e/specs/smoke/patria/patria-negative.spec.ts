@@ -1,25 +1,27 @@
 /**
  * Smoke: Patria leads API — negative tests (auth, routing, bad payload).
  *
- * What this file covers:
- *   - Auth: no apiKey header → 401/403. Invalid apiKey → 401/403.
- *   - Routing: POST to a non-existent tenant path → 404.
- *   - Bad payload: empty body → 4xx. Missing SSN field → 4xx.
+ * What this file covers (mapped to PayPlan):
+ *   - Auth: FTSKeyAuth guard returns false → 403 Forbidden.
+ *     - No apiKey header → 403
+ *     - Invalid apiKey → 403
+ *   - Routing: non-existent tenant path → 404 (NestJS routing).
+ *   - Bad payload (all return 400 BadRequestException):
+ *     - Empty body → caught by controller catch-all → 400
+ *     - Missing SSN → explicit check in processLead() line 1066 → 400
+ *     - Empty SSN → same check (falsy SSN) → 400
+ *     - Missing personalInformation → controller catch-all → 400
  *
  * Why these are safe:
  *   Every request is rejected before business logic runs.
  *   No lead or application is created. No credit bureau call. No cost.
  *
- * Why only SSN and empty body for payload tests:
- *   The API has minimal server-side validation (only merchantKey + SSN).
- *   Fields like loanAmount and bankInformation are not validated at intake —
+ * Why only these payload cases:
+ *   The API only validates merchantKey + SSN server-side (leads-management.service.ts).
+ *   Fields like loanAmount, bankInformation are NOT validated at intake —
  *   the API accepts them and lets downstream underwriting/DMN decide.
  *   Testing those would create real accepted leads (application pollution).
  *
- * Happy path reference: patria-contract.spec.ts (valid 201).
- *
- * Requires: UI_AUTOMATION_KEY in .env (local) or GitHub Secrets (CI).
- * Run: npm run test:patria or npm run test:smoke
  */
 import { test, expect } from '@playwright/test';
 import { env } from '../../../../config/env';
@@ -40,29 +42,32 @@ const authedHeaders = (): Record<string, string> => ({
 test.describe('Patria leads API — negative tests', () => {
   test.skip(!env.UI_AUTOMATION_KEY, 'UI_AUTOMATION_KEY not set');
 
-  // ── Auth rejection ─────────────────────────────────────────────
+  // ── Auth rejection (FTSKeyAuth guard → 403) ────────────────────
 
-  test('no apiKey returns 401 or 403', async ({ request }) => {
+  /** FTSKeyAuth guard: no apiKey in headers/query → canActivate returns false → 403. */
+  test('no apiKey returns 403', async ({ request }) => {
     const res = await request.post(PATRIA_PROCESS_URL, {
       headers: { accept: 'application/json', 'Content-Type': 'application/json' },
       data: buildValidLeadPayload(),
       timeout: TIMEOUT,
     });
-    expect([401, 403]).toContain(res.status());
+    expect(res.status()).toBe(403);
   });
 
-  test('invalid apiKey returns 401 or 403', async ({ request }) => {
+  /** FTSKeyAuth guard: apiKey !== app.ftsToken → canActivate returns false → 403. */
+  test('invalid apiKey returns 403', async ({ request }) => {
     const res = await request.post(PATRIA_PROCESS_URL, {
       headers: { accept: 'application/json', 'Content-Type': 'application/json', apiKey: 'FAKE' },
       data: buildValidLeadPayload(),
       timeout: TIMEOUT,
     });
-    expect([401, 403]).toContain(res.status());
+    expect(res.status()).toBe(403);
   });
 
-  // ── Routing ────────────────────────────────────────────────────
+  // ── Routing (NestJS → 404) ─────────────────────────────────────
 
-  test('invalid path returns 404', async ({ request }) => {
+  /** No route registered for /INVALID/ → NestJS returns 404. */
+  test('invalid tenant path returns 404', async ({ request }) => {
     const res = await request.post(`${env.API_BASE_URL}/api/leads-management/INVALID/process`, {
       headers: authedHeaders(),
       data: buildValidLeadPayload(),
@@ -71,19 +76,20 @@ test.describe('Patria leads API — negative tests', () => {
     expect(res.status()).toBe(404);
   });
 
-  // ── Bad payload (schema-level rejection, no lead created) ─────
+  // ── Bad payload (controller catch-all / service validation → 400) ──
 
-  test('empty body is rejected', async ({ request }) => {
+  /** Empty body: no personalInformation, no SSN → caught by controller catch block → 400. */
+  test('empty body returns 400', async ({ request }) => {
     const res = await request.post(PATRIA_PROCESS_URL, {
       headers: authedHeaders(),
       data: {},
       timeout: TIMEOUT,
     });
-    expect(res.status()).toBeGreaterThanOrEqual(400);
-    expect(res.status()).toBeLessThan(500);
+    expect(res.status()).toBe(400);
   });
 
-  test('missing SSN is rejected', async ({ request }) => {
+  /** Missing SSN field entirely: processLead() checks !transformedPayload.lead.ssn → 400. */
+  test('missing SSN field returns 400', async ({ request }) => {
     const payload = buildValidLeadPayload();
     const { ssnNumber, ...restPersonal } = payload.personalInformation;
     const res = await request.post(PATRIA_PROCESS_URL, {
@@ -91,7 +97,29 @@ test.describe('Patria leads API — negative tests', () => {
       data: { ...payload, personalInformation: restPersonal },
       timeout: TIMEOUT,
     });
-    expect(res.status()).toBeGreaterThanOrEqual(400);
-    expect(res.status()).toBeLessThan(500);
+    expect(res.status()).toBe(400);
+  });
+
+  /** Empty SSN string: processLead() checks !transformedPayload.lead.ssn (falsy) → 400. */
+  test('empty SSN string returns 400', async ({ request }) => {
+    const payload = buildValidLeadPayload({ ssnNumber: '' });
+    const res = await request.post(PATRIA_PROCESS_URL, {
+      headers: authedHeaders(),
+      data: payload,
+      timeout: TIMEOUT,
+    });
+    expect(res.status()).toBe(400);
+  });
+
+  /** Missing personalInformation entirely: transformPayload fails → controller catch → 400. */
+  test('missing personalInformation returns 400', async ({ request }) => {
+    const payload = buildValidLeadPayload();
+    const { personalInformation, ...rest } = payload;
+    const res = await request.post(PATRIA_PROCESS_URL, {
+      headers: authedHeaders(),
+      data: rest,
+      timeout: TIMEOUT,
+    });
+    expect(res.status()).toBe(400);
   });
 });
