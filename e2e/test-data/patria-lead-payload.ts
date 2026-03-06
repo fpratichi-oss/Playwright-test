@@ -111,8 +111,8 @@ export function buildValidLeadPayload(overrides: PatriaLeadPayloadOverrides = {}
     loanAmount: o.loanAmount,
     refererURL: 'https://testloans.com',
     personalInformation: {
-      firstName: 'Sam',
-      lastName: 'Ave',
+      firstName: 'Test-Sam',
+      lastName: 'Test-Ave',
       birthday: '1989/03/12',
       address: {
         zipCode: '55316',
